@@ -126,30 +126,28 @@ def router(dp: Dispatcher):
     async def callback_help(callback: types.CallbackQuery):
         bot_me = await dp.bot.get_me()
         bot_name = bot_me.first_name
-        bot_username = bot_me.username
-        links = await db.get_bot_links()
-        group_link = links['group_link'] or f"https://t.me/{bot_username}?startgroup=admin"
-        channel_link = links['channel_link']
-        support_link = links['support_link']
 
         text = (
-            f"<b>👋 {bot_name} ga xush kelibsiz!</b>\n\n"
-            f"• Bu bot guruhlaringizni boshqarishga yordam beradi\n"
-            f"• Anti-spam, verifikatsiya, anti-link va boshqalar\n"
-            f"• Meni guruhingizga qo'shing va admin huquqini bering\n\n"
-
-            f"<b>👋 Добро пожаловать в {bot_name}!</b>\n\n"
-            f"• Этот бот помогает управлять группами\n"
-            f"• Анти-спам, верификация, анти-ссылки и другое\n"
-            f"• Добавьте меня в вашу группу и дайте права админа\n\n"
-
-            f"👑 <b>1 357 413</b> monthly users"
+            f"ℹ️ <b>{bot_name}</b>\n\n"
+            f"<b>🤖 Versiya:</b> 2.0\n"
+            f"<b>👑 Egasi:</b> @{OWNER_ID}\n\n"
+            f"<b>📋 Imkoniyatlar:</b>\n"
+            f"• 🛡️ <b>Himoya:</b> Anti-flood, Anti-spam, Anti-porn, Captcha, Night mode, Word filter, Media restrict, Invite restrict\n"
+            f"• 👤 <b>Foydalanuvchilar:</b> /info, Name history, Reyting, Qidirish\n"
+            f"• ⚙️ <b>Boshqaruv:</b> Welcome, Qoidalar, Auto-reply, Scheduled, Polls, Backup, Log, Blocklist\n"
+            f"• 🔐 <b>Verifikatsiya:</b> Ism, Telefon, Selfi orqali tekshirish\n"
+            f"• 🤖 <b>Anti-bot:</b> Boshqa botlarni avtomatik bloklash\n\n"
+            f"<b>🌐 Til:</b> O'zbekcha, Русский, English\n\n"
+            f"<b>📌 Qanday ishlatish:</b>\n"
+            f"1. Meni guruhingizga qo'shing\n"
+            f"2. Admin qiling\n"
+            f"3. /panel orqali sozlamalarni boshqaring"
         )
 
         await callback.message.edit_text(
             text,
             parse_mode='HTML',
-            reply_markup=get_grouphelp_keyboard(bot_username, group_link, channel_link, support_link)
+            reply_markup=get_start_language_keyboard()
         )
         await callback.answer()
 
