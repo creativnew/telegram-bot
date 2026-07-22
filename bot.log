@@ -873,3 +873,74 @@ Traceback (most recent call last):
   File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
     raise err(cls.text or description)
 aiogram.utils.exceptions.MessageNotModified: Message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2026-07-22 19:55:51,608 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 19:55:52,449 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 19:55:52,449 - __main__ - INFO - ============================================================
+2026-07-22 19:55:52,450 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 19:55:52,450 - __main__ - INFO - ============================================================
+2026-07-22 19:55:52,465 - __main__ - INFO - ✅ Database connected
+2026-07-22 19:55:52,469 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 19:55:52,855 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 19:55:54,085 - __main__ - INFO - ✅ Commands set
+2026-07-22 19:55:54,473 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 19:55:54,473 - __main__ - INFO - ============================================================
+2026-07-22 19:55:54,473 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 19:55:54,474 - __main__ - INFO - ============================================================
+2026-07-22 19:55:54,474 - aiogram.dispatcher.dispatcher - INFO - Start polling.
+2026-07-22 19:58:36,454 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 19:58:36,767 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 19:58:36,768 - __main__ - INFO - ============================================================
+2026-07-22 19:58:36,768 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 19:58:36,768 - __main__ - INFO - ============================================================
+2026-07-22 19:58:36,785 - __main__ - INFO - ✅ Database connected
+2026-07-22 19:58:36,788 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 19:58:36,949 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 19:58:37,330 - __main__ - INFO - ✅ Commands set
+2026-07-22 19:58:37,562 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 19:58:37,563 - __main__ - INFO - ============================================================
+2026-07-22 19:58:37,563 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 19:58:37,563 - __main__ - INFO - ============================================================
+2026-07-22 19:58:37,564 - aiogram.dispatcher.dispatcher - INFO - Start polling.
+2026-07-22 21:39:34,148 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates.
+Traceback (most recent call last):
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client_reqrep.py", line 558, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\streams.py", line 705, in read
+    await self._waiter
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\bot\bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                  proxy=self.proxy, proxy_auth=self.proxy_auth, timeout=self.timeout, **kwargs)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\bot\api.py", line 139, in make_request
+    async with session.post(url, data=req, **kwargs) as response:
+               ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client.py", line 1693, in __aenter__
+    self._resp: _RetType_co = await self._coro
+                              ^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client.py", line 858, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client.py", line 836, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client_reqrep.py", line 553, in start
+    with self._timer:
+         ^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\helpers.py", line 759, in __exit__
+    raise asyncio.TimeoutError from exc_val
+TimeoutError

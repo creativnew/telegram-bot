@@ -231,7 +231,7 @@ def get_language_keyboard(lang='uz') -> InlineKeyboardMarkup:
 
 
 def get_grouphelp_keyboard(bot_username='', group_link='', channel_link='', support_link='') -> InlineKeyboardMarkup:
-    add_url = group_link or f"https://t.me/{bot_username}?startgroup=admin" if bot_username else "https://t.me/"
+    add_url = f"https://t.me/{bot_username}?startgroup=admin" if bot_username else "https://t.me/"
     group_url = group_link or "https://t.me/"
     channel_url = channel_link or "https://t.me/"
     support_url = support_link or "https://t.me/"
