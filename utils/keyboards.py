@@ -228,6 +228,31 @@ def get_language_keyboard(lang='uz') -> InlineKeyboardMarkup:
     return keyboard
 
 
+def get_grouphelp_keyboard() -> InlineKeyboardMarkup:
+    from config import GROUP_LINK, CHANNEL_LINK, SUPPORT_LINK
+    buttons = []
+
+    row1 = []
+    row1.append(InlineKeyboardButton(text="➕ Добавить меня в группу", url=GROUP_LINK or "https://t.me/"))
+    buttons.append(row1)
+
+    row2 = []
+    row2.append(InlineKeyboardButton(text="👥 Группа", url=GROUP_LINK or "https://t.me/"))
+    row2.append(InlineKeyboardButton(text="📢 Канал", url=CHANNEL_LINK or "https://t.me/"))
+    buttons.append(row2)
+
+    row3 = []
+    row3.append(InlineKeyboardButton(text="🆘 Поддержка", url=SUPPORT_LINK or "https://t.me/"))
+    row3.append(InlineKeyboardButton(text="ℹ️ Информация", callback_data="help"))
+    buttons.append(row3)
+
+    row4 = []
+    row4.append(InlineKeyboardButton(text="🌐 Languages", callback_data="start_lang_menu"))
+    buttons.append(row4)
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 def get_start_language_keyboard() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[

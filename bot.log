@@ -566,3 +566,17 @@ aiogram.utils.exceptions.NetworkError: Aiohttp client throws an error: ServerDis
 2026-07-22 18:21:21,285 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
 2026-07-22 18:21:21,285 - __main__ - INFO - ============================================================
 2026-07-22 18:21:21,285 - aiogram.dispatcher.dispatcher - INFO - Start polling.
+2026-07-22 18:33:54,906 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 18:33:55,297 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 18:33:55,297 - __main__ - INFO - ============================================================
+2026-07-22 18:33:55,298 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 18:33:55,298 - __main__ - INFO - ============================================================
+2026-07-22 18:33:55,307 - __main__ - INFO - ✅ Database connected
+2026-07-22 18:33:55,310 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 18:33:55,502 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 18:33:55,706 - __main__ - INFO - ✅ Commands set
+2026-07-22 18:33:55,911 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 18:33:55,912 - __main__ - INFO - ============================================================
+2026-07-22 18:33:55,913 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 18:33:55,913 - __main__ - INFO - ============================================================
+2026-07-22 18:33:55,913 - aiogram.dispatcher.dispatcher - INFO - Start polling.

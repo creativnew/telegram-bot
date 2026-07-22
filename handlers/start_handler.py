@@ -1,15 +1,32 @@
 from aiogram import types, Dispatcher
-from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 
 from database import db
-from config import OWNER_ID, PREMIUM_STICKER
-from utils.keyboards import get_start_language_keyboard, get_start_keyboard, get_language_keyboard
+from config import OWNER_ID, PREMIUM_STICKER, GROUP_LINK, CHANNEL_LINK, SUPPORT_LINK
+from utils.keyboards import (
+    get_grouphelp_keyboard, get_start_language_keyboard,
+    get_start_keyboard, get_language_keyboard
+)
 from utils.language import get_text
 from utils.helpers import Logger
 
 
-async def _send_welcome(bot, msg_or_callback, user, lang):
+WELCOME_TEXT = (
+    "<b>👋 Welcome to Group Help Bot!</b>\n\n"
+    "• This bot helps you manage your groups\n"
+    "• Anti-spam, verification, anti-link and more\n"
+    "• Add me to your group and give me admin rights\n\n"
+
+    "<b>👋 Добро пожаловать в Group Help Bot!</b>\n\n"
+    "• Этот бот помогает управлять группами\n"
+    "• Анти-спам, верификация, анти-ссылки и другое\n"
+    "• Добавьте меня в вашу группу и дайте права админа\n\n"
+
+    "👑 <b>1 357 413</b> monthly users"
+)
+
+
+async def _send_personal_welcome(bot, message, user, lang):
     if user.id == OWNER_ID:
         text = (
             f"👑 <b>Salom, {user.first_name}!</b>\n\n"
@@ -17,7 +34,7 @@ async def _send_welcome(bot, msg_or_callback, user, lang):
             f"Admin panelga kirish: /panel\n"
             f"Yordam: /help"
         )
-        await msg_or_callback.answer(text, parse_mode='HTML', reply_markup=get_start_keyboard(lang))
+        await message.answer(text, parse_mode='HTML', reply_markup=get_start_keyboard(lang))
     elif await db.is_admin(user.id):
         text = (
             f"👤 <b>Salom, {user.first_name}!</b>\n\n"
@@ -25,10 +42,10 @@ async def _send_welcome(bot, msg_or_callback, user, lang):
             f"Admin panel: /panel\n"
             f"Yordam: /help"
         )
-        await msg_or_callback.answer(text, parse_mode='HTML')
+        await message.answer(text, parse_mode='HTML')
     else:
         text = get_text('start_welcome', lang, name=user.first_name)
-        await msg_or_callback.answer(text, parse_mode='HTML')
+        await message.answer(text, parse_mode='HTML')
 
     if PREMIUM_STICKER:
         try:
@@ -42,6 +59,7 @@ def router(dp: Dispatcher):
     @dp.message_handler(Command("start"))
     async def cmd_start(message: types.Message):
         user = message.from_user
+        bot = dp.bot
 
         await db.add_user(
             user_id=user.id,
@@ -53,17 +71,30 @@ def router(dp: Dispatcher):
 
         existing_lang = await db.get_user_language(user.id)
 
-        if existing_lang and existing_lang != 'uz':
-            await _send_welcome(dp.bot, message, user, existing_lang)
+        if existing_lang != 'uz':
+            await _send_personal_welcome(bot, message, user, existing_lang)
             return
 
-        text = (
-            f"👋 <b>Salom, {user.first_name}!</b>\n\n"
-            f"🌍 <b>Iltimos, tilni tanlang:</b>\n"
-            f"Пожалуйста, выберите язык:\n"
-            f"Please select a language:"
+        await message.answer(
+            WELCOME_TEXT,
+            parse_mode='HTML',
+            reply_markup=get_grouphelp_keyboard()
         )
-        await message.answer(text, parse_mode='HTML', reply_markup=get_start_language_keyboard())
+
+        if PREMIUM_STICKER:
+            try:
+                await bot.send_sticker(chat_id=user.id, sticker=PREMIUM_STICKER)
+            except Exception:
+                pass
+
+    @dp.callback_query_handler(lambda c: c.data == "start_lang_menu")
+    async def show_start_languages(callback: types.CallbackQuery):
+        await callback.message.edit_text(
+            "🌐 <b>Select language / Выберите язык / Tilni tanlang:</b>",
+            parse_mode='HTML',
+            reply_markup=get_start_language_keyboard()
+        )
+        await callback.answer()
 
     @dp.callback_query_handler(lambda c: c.data.startswith("start_lang:"))
     async def set_start_language(callback: types.CallbackQuery):
@@ -74,21 +105,20 @@ def router(dp: Dispatcher):
             return
 
         await db.set_user_language(user.id, lang)
-        await _send_welcome(dp.bot, callback.message, user, lang)
+        await _send_personal_welcome(dp.bot, callback.message, user, lang)
         await callback.answer()
 
     @dp.message_handler(Command("help"))
     async def cmd_help(message: types.Message):
         lang = await db.get_user_language(message.from_user.id)
-        help_text = get_text('help_text', lang)
-        await message.answer(help_text, parse_mode='HTML')
+        await message.answer(get_text('help_text', lang), parse_mode='HTML')
 
     @dp.callback_query_handler(lambda c: c.data == "help")
     async def callback_help(callback: types.CallbackQuery):
-        lang = await db.get_user_language(callback.from_user.id)
         await callback.message.edit_text(
-            get_text('help_text', lang),
-            parse_mode='HTML'
+            WELCOME_TEXT,
+            parse_mode='HTML',
+            reply_markup=get_grouphelp_keyboard()
         )
         await callback.answer()
 
