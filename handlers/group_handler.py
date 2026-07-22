@@ -72,7 +72,7 @@ def router(dp: Dispatcher):
                 )
 
                 # Welcome xabar (agar yoqilgan bo'lsa)
-                welcome_enabled = await db.get_bool_setting('welcome_message')
+                welcome_enabled = await db.get_bool_setting('welcome_custom_enabled')
                 if welcome_enabled:
                     try:
                         await dp.bot.send_message(

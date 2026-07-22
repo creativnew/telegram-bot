@@ -335,6 +335,9 @@ def router(dp: Dispatcher):
     async def toggle_setting(callback: types.CallbackQuery):
         try:
             user_id = callback.from_user.id
+            if not (await db.is_admin(user_id) or user_id == OWNER_ID):
+                await callback.answer("❌ Ruxsat yo'q!", show_alert=True)
+                return
             lang = await db.get_user_language(user_id) or 'uz'
             setting = callback.data.split(":")[1]
             setting_key = f"{setting}_enabled"

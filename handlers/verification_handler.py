@@ -421,6 +421,11 @@ def router(dp: Dispatcher):
         """Foydalanuvchini qabul qilish"""
         bot = dp.bot
 
+        admin = callback.from_user
+        if not (await db.is_admin(admin.id) or admin.id == OWNER_ID):
+            await callback.answer("❌ Ruxsat yo'q!", show_alert=True)
+            return
+
         try:
             _, request_id, user_id = callback.data.split(":")
             request_id = int(request_id)
@@ -428,8 +433,6 @@ def router(dp: Dispatcher):
         except ValueError:
             await callback.answer("❌ Xatolik!", show_alert=True)
             return
-
-        admin = callback.from_user
 
         try:
             lang = await db.get_user_language(user_id)
@@ -480,6 +483,11 @@ def router(dp: Dispatcher):
         """Foydalanuvchini rad etish"""
         bot = dp.bot
 
+        admin = callback.from_user
+        if not (await db.is_admin(admin.id) or admin.id == OWNER_ID):
+            await callback.answer("❌ Ruxsat yo'q!", show_alert=True)
+            return
+
         try:
             _, request_id, user_id = callback.data.split(":")
             request_id = int(request_id)
@@ -487,8 +495,6 @@ def router(dp: Dispatcher):
         except ValueError:
             await callback.answer("❌ Xatolik!", show_alert=True)
             return
-
-        admin = callback.from_user
 
         try:
             lang = await db.get_user_language(user_id)

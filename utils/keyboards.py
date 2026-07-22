@@ -272,25 +272,18 @@ def get_security_category_keyboard(settings: dict, lang='uz') -> InlineKeyboardM
 
 
 def get_users_category_keyboard(settings: dict, lang='uz') -> InlineKeyboardMarkup:
-    items = [
-        ('btn_userinfo', 'toggle:userinfo'),
-        ('btn_namehistory', 'toggle:namehistory'),
-        ('btn_ranking', 'toggle:user_ranking'),
-        ('btn_user_search', 'toggle:user_search'),
-    ]
+    key_map = {
+        'btn_userinfo': 'userinfo',
+        'btn_namehistory': 'namehistory',
+        'btn_ranking': 'user_ranking',
+        'btn_user_search': 'user_search',
+    }
     buttons = []
-    for key, cb in items:
-        status_key = key.replace('btn_', '')
-        if status_key == 'btn_namehistory':
-            status_key = 'namehistory'
-        settings_key = status_key if status_key in settings else status_key.replace('btn_', '')
-        status = settings.get('userinfo' if 'userinfo' in key else
-                             'namehistory' if 'namehistory' in key else
-                             'user_ranking' if 'ranking' in key else
-                             'user_search', False)
+    for btn_key, setting_key in key_map.items():
+        status = settings.get(setting_key, False)
         buttons.append(InlineKeyboardButton(
-            text=_toggle_text(key, status, lang),
-            callback_data=cb
+            text=_toggle_text(btn_key, status, lang),
+            callback_data=f"toggle:{setting_key}"
         ))
     buttons.append(InlineKeyboardButton(text=get_text('btn_back', lang), callback_data="panel_back"))
     return _build_category_keyboard(buttons, lang)
