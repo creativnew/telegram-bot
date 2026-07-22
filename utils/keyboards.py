@@ -163,15 +163,16 @@ def get_main_menu_keyboard(lang: str = 'uz') -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text=get_text('btn_security', lang), callback_data="security"),
-                InlineKeyboardButton(text=get_text('btn_settings', lang), callback_data="settings"),
+                InlineKeyboardButton(text=get_text('btn_security_section', lang), callback_data="sec_main"),
+                InlineKeyboardButton(text=get_text('btn_users_section', lang), callback_data="users_main"),
+                InlineKeyboardButton(text=get_text('btn_management_section', lang), callback_data="mgmt_main"),
             ],
             [
-                InlineKeyboardButton(text=get_text('btn_statistics', lang), callback_data="statistics"),
+                InlineKeyboardButton(text=get_text('btn_stats', lang), callback_data="stats_main"),
                 InlineKeyboardButton(text=get_text('btn_broadcast', lang), callback_data="broadcast"),
+                InlineKeyboardButton(text=get_text('btn_admins', lang), callback_data="admins_main"),
             ],
             [
-                InlineKeyboardButton(text=get_text('btn_admins', lang), callback_data="admins"),
                 InlineKeyboardButton(text=get_text('btn_language', lang), callback_data="lang"),
             ],
         ]
@@ -237,3 +238,82 @@ def get_start_keyboard(lang='uz') -> InlineKeyboardMarkup:
         ]
     )
     return keyboard
+
+
+def _build_category_keyboard(buttons: list, lang: str, cols: int = 2) -> InlineKeyboardMarkup:
+    """Category tugmalarini yaratish (2 ustun)"""
+    rows = []
+    for i in range(0, len(buttons), cols):
+        row_buttons = buttons[i:i+cols]
+        rows.append(row_buttons)
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def get_security_category_keyboard(settings: dict, lang='uz') -> InlineKeyboardMarkup:
+    items = [
+        ('btn_antiflood', 'toggle:antiflood'),
+        ('btn_antispam', 'toggle:antispam'),
+        ('btn_antiporn', 'toggle:antiporn'),
+        ('btn_captcha', 'toggle:captcha'),
+        ('btn_nightmode', 'toggle:nightmode'),
+        ('btn_wordfilter', 'toggle:wordfilter'),
+        ('btn_media_restrict', 'toggle:media_restrict'),
+        ('btn_invite_restrict', 'toggle:invite_restrict'),
+    ]
+    buttons = []
+    for key, cb in items:
+        status = settings.get(key.replace('btn_', ''), False)
+        buttons.append(InlineKeyboardButton(
+            text=_toggle_text(key, status, lang),
+            callback_data=cb
+        ))
+    buttons.append(InlineKeyboardButton(text=get_text('btn_back', lang), callback_data="panel_back"))
+    return _build_category_keyboard(buttons, lang)
+
+
+def get_users_category_keyboard(settings: dict, lang='uz') -> InlineKeyboardMarkup:
+    items = [
+        ('btn_userinfo', 'toggle:userinfo'),
+        ('btn_namehistory', 'toggle:namehistory'),
+        ('btn_ranking', 'toggle:user_ranking'),
+        ('btn_user_search', 'toggle:user_search'),
+    ]
+    buttons = []
+    for key, cb in items:
+        status_key = key.replace('btn_', '')
+        if status_key == 'btn_namehistory':
+            status_key = 'namehistory'
+        settings_key = status_key if status_key in settings else status_key.replace('btn_', '')
+        status = settings.get('userinfo' if 'userinfo' in key else
+                             'namehistory' if 'namehistory' in key else
+                             'user_ranking' if 'ranking' in key else
+                             'user_search', False)
+        buttons.append(InlineKeyboardButton(
+            text=_toggle_text(key, status, lang),
+            callback_data=cb
+        ))
+    buttons.append(InlineKeyboardButton(text=get_text('btn_back', lang), callback_data="panel_back"))
+    return _build_category_keyboard(buttons, lang)
+
+
+def get_management_category_keyboard(settings: dict, lang='uz') -> InlineKeyboardMarkup:
+    items = [
+        ('btn_welcome', 'toggle:welcome_custom'),
+        ('btn_rules', 'toggle:rules'),
+        ('btn_autoreply', 'toggle:autoreply'),
+        ('btn_scheduled', 'toggle:scheduled'),
+        ('btn_polls', 'toggle:polls'),
+        ('btn_backup', 'toggle:backup'),
+        ('btn_log_channel', 'toggle:log_channel'),
+        ('btn_blocklist', 'toggle:blocklist'),
+    ]
+    buttons = []
+    for key, cb in items:
+        setting_key = cb.split(':')[1]
+        status = settings.get(setting_key, False)
+        buttons.append(InlineKeyboardButton(
+            text=_toggle_text(key, status, lang),
+            callback_data=cb
+        ))
+    buttons.append(InlineKeyboardButton(text=get_text('btn_back', lang), callback_data="panel_back"))
+    return _build_category_keyboard(buttons, lang)

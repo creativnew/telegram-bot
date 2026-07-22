@@ -18,6 +18,8 @@ from utils.keyboards import (
     get_main_menu_keyboard, get_security_keyboard,
     get_language_keyboard, get_broadcast_confirm_keyboard,
     get_stats_keyboard, get_back_keyboard,
+    get_security_category_keyboard, get_users_category_keyboard,
+    get_management_category_keyboard,
 )
 from utils.language import get_text
 from utils.helpers import Logger, is_valid_user_id
@@ -96,6 +98,85 @@ def router(dp: Dispatcher):
     # SETTINGS
     # ============================================================
 
+    # ============================================================
+    # SECURITY CATEGORY (sec_main)
+    # ============================================================
+
+    @dp.callback_query_handler(lambda c: c.data == "sec_main")
+    async def show_security_category(callback: types.CallbackQuery):
+        try:
+            user_id = callback.from_user.id
+            lang = await db.get_user_language(user_id) or 'uz'
+
+            settings = {}
+            for key in ['antiflood','antispam','antiporn','captcha','nightmode','wordfilter','media_restrict','invite_restrict']:
+                settings[key] = await db.get_bool_setting(f'{key}_enabled')
+
+            await callback.message.edit_text(
+                get_text('security_category_title', lang),
+                parse_mode='HTML',
+                reply_markup=get_security_category_keyboard(settings, lang)
+            )
+            await callback.answer()
+        except Exception as e:
+            Logger.error(f"Security category error: {e}")
+            await callback.answer("❌ Xatolik!", show_alert=True)
+
+    # ============================================================
+    # USERS CATEGORY (users_main)
+    # ============================================================
+
+    @dp.callback_query_handler(lambda c: c.data == "users_main")
+    async def show_users_category(callback: types.CallbackQuery):
+        try:
+            user_id = callback.from_user.id
+            lang = await db.get_user_language(user_id) or 'uz'
+
+            settings = {
+                'userinfo': await db.get_bool_setting('userinfo_enabled'),
+                'namehistory': await db.get_bool_setting('namehistory_enabled'),
+                'user_ranking': await db.get_bool_setting('user_ranking_enabled'),
+                'user_search': await db.get_bool_setting('user_search_enabled'),
+            }
+
+            await callback.message.edit_text(
+                get_text('users_category_title', lang),
+                parse_mode='HTML',
+                reply_markup=get_users_category_keyboard(settings, lang)
+            )
+            await callback.answer()
+        except Exception as e:
+            Logger.error(f"Users category error: {e}")
+            await callback.answer("❌ Xatolik!", show_alert=True)
+
+    # ============================================================
+    # MANAGEMENT CATEGORY (mgmt_main)
+    # ============================================================
+
+    @dp.callback_query_handler(lambda c: c.data == "mgmt_main")
+    async def show_management_category(callback: types.CallbackQuery):
+        try:
+            user_id = callback.from_user.id
+            lang = await db.get_user_language(user_id) or 'uz'
+
+            settings = {}
+            for key in ['welcome_custom','rules','autoreply','scheduled','polls','backup','log_channel','blocklist']:
+                settings[key] = await db.get_bool_setting(f'{key}_enabled')
+
+            await callback.message.edit_text(
+                get_text('management_category_title', lang),
+                parse_mode='HTML',
+                reply_markup=get_management_category_keyboard(settings, lang)
+            )
+            await callback.answer()
+        except Exception as e:
+            Logger.error(f"Management category error: {e}")
+            await callback.answer("❌ Xatolik!", show_alert=True)
+
+    # ============================================================
+    # SETTINGS
+    # ============================================================
+
     @dp.callback_query_handler(lambda c: c.data == "settings")
     async def show_settings(callback: types.CallbackQuery):
         try:
@@ -149,7 +230,7 @@ def router(dp: Dispatcher):
     # ADMINS SUBMENU
     # ============================================================
 
-    @dp.callback_query_handler(lambda c: c.data == "admins")
+    @dp.callback_query_handler(lambda c: c.data == "admins_main")
     async def show_admins_menu(callback: types.CallbackQuery):
         try:
             user_id = callback.from_user.id
@@ -170,6 +251,35 @@ def router(dp: Dispatcher):
             await callback.answer()
         except Exception as e:
             Logger.error(f"Admins menu error: {e}")
+            await callback.answer("❌ Xatolik!", show_alert=True)
+
+    # ============================================================
+    # STATS MAIN
+    # ============================================================
+
+    @dp.callback_query_handler(lambda c: c.data == "stats_main")
+    async def show_stats_main(callback: types.CallbackQuery):
+        try:
+            user_id = callback.from_user.id
+            lang = await db.get_user_language(user_id) or 'uz'
+            stats = await db.get_statistics()
+
+            text = get_text('stats_text', lang,
+                            total=stats['total_users'],
+                            active=stats['active_users'],
+                            pending=stats['pending_users'],
+                            banned=stats['banned_users'],
+                            admins=stats['total_admins'],
+                            today=stats['today_joined'])
+
+            await callback.message.edit_text(
+                text,
+                parse_mode='HTML',
+                reply_markup=get_stats_keyboard()
+            )
+            await callback.answer()
+        except Exception as e:
+            Logger.error(f"Stats main error: {e}")
             await callback.answer("❌ Xatolik!", show_alert=True)
 
     # ============================================================
@@ -231,18 +341,20 @@ def router(dp: Dispatcher):
 
             new_status = await db.toggle_setting(setting_key)
 
-            verification = await db.get_bool_setting('verification_enabled')
-            photo = await db.get_bool_setting('ask_photo_enabled')
-            phone = await db.get_bool_setting('ask_phone_enabled')
-            antilink = await db.get_bool_setting('antilink_enabled')
-            antibot = await db.get_bool_setting('antibot_enabled')
-            antiswear = await db.get_bool_setting('antiswear_enabled')
-
+            # Show main menu after toggle
             try:
+                stats = await db.get_statistics()
+                text = get_text('panel_info', lang,
+                                total=stats['total_users'],
+                                active=stats['active_users'],
+                                pending=stats['pending_users'],
+                                banned=stats['banned_users'],
+                                admins=stats['total_admins'],
+                                today=stats['today_joined'])
                 await callback.message.edit_text(
-                    get_text('security', lang),
+                    text,
                     parse_mode='HTML',
-                    reply_markup=get_security_keyboard(verification, photo, phone, antilink, antibot, antiswear, lang)
+                    reply_markup=get_main_menu_keyboard(lang)
                 )
             except Exception:
                 pass
