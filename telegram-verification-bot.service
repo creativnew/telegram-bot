@@ -1,0 +1,15 @@
+[Unit]
+Description=Telegram Verification Bot
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/telegram_bot_aiogram2x
+Environment=PATH=/root/telegram_bot_aiogram2x/venv/bin
+ExecStart=/root/telegram_bot_aiogram2x/venv/bin/python3 /root/telegram_bot_aiogram2x/main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
