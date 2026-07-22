@@ -443,15 +443,16 @@ def router(dp: Dispatcher):
 
         names = {'group': '👥 Guruh', 'channel': '📢 Kanal', 'support': '🆘 Support'}
         name = names.get(link_type, link_type)
-        states = {'group': BotLinks.WAITING_GROUP_LINK, 'channel': BotLinks.WAITING_CHANNEL_LINK, 'support': BotLinks.WAITING_SUPPORT_LINK}
-        state = states.get(link_type)
-        if not state:
+        target_states = {'group': BotLinks.WAITING_GROUP_LINK, 'channel': BotLinks.WAITING_CHANNEL_LINK, 'support': BotLinks.WAITING_SUPPORT_LINK}
+        target_state = target_states.get(link_type)
+        if not target_state:
             await callback.answer()
             return
 
-        await state.set()
-        async with dp.current_state(user=user_id, chat=user_id) as fsm:
-            await fsm.update_data(link_type=link_type)
+        storage = dp.storage
+        fsm = FSMContext(storage=storage, chat=user_id, user=user_id)
+        await fsm.set_state(target_state)
+        await fsm.update_data(link_type=link_type)
 
         await callback.message.edit_text(
             f"{name} linkini yuboring.\nMisol: <code>https://t.me/your_group</code>\n\n/cancel - Bekor qilish",

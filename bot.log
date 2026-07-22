@@ -638,3 +638,39 @@ Traceback (most recent call last):
   File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
     raise err(cls.text or description)
 aiogram.utils.exceptions.MessageNotModified: Message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2026-07-22 19:40:03,739 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 19:40:04,142 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 19:40:04,143 - __main__ - INFO - ============================================================
+2026-07-22 19:40:04,143 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 19:40:04,144 - __main__ - INFO - ============================================================
+2026-07-22 19:40:04,182 - __main__ - INFO - ✅ Database connected
+2026-07-22 19:40:04,186 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 19:40:04,400 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 19:40:04,608 - __main__ - INFO - ✅ Commands set
+2026-07-22 19:40:04,920 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 19:40:04,922 - __main__ - INFO - ============================================================
+2026-07-22 19:40:04,922 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 19:40:04,923 - __main__ - INFO - ============================================================
+2026-07-22 19:40:04,923 - aiogram.dispatcher.dispatcher - INFO - Start polling.
+2026-07-22 19:42:54,441 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-34' coro=<Dispatcher._process_polling_updates() done, defined at C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=TypeError("'aiogram.dispatcher.storage.FSMContext' object does not support the asynchronous context manager protocol (missed __aexit__ method)")>
+Traceback (most recent call last):
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\handlers\admin_handler.py", line 453, in start_set_link
+    async with dp.current_state(user=user_id, chat=user_id) as fsm:
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'aiogram.dispatcher.storage.FSMContext' object does not support the asynchronous context manager protocol (missed __aexit__ method)
