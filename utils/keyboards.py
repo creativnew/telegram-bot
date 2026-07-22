@@ -228,6 +228,17 @@ def get_language_keyboard(lang='uz') -> InlineKeyboardMarkup:
     return keyboard
 
 
+def get_start_language_keyboard() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🇺🇿 O'zbekcha", callback_data="start_lang:uz")],
+            [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="start_lang:ru")],
+            [InlineKeyboardButton(text="🇺🇸 English", callback_data="start_lang:en")],
+        ]
+    )
+    return keyboard
+
+
 def get_start_keyboard(lang='uz') -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[

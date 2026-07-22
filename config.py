@@ -35,6 +35,10 @@ WARN_LIMIT = 3
 # 7. Mut vaqti (soat)
 MUTE_DURATION_HOURS = 24
 
+# 8. Premium stiker (file_id yoki None)
+# @StickerDownloadBot dan olishingiz mumkin
+PREMIUM_STICKER = None  # "CAACAgIAAxkBAA..."
+
 # ============================================================
 # QO'SHIMCHA SOZLAMALAR
 # ============================================================

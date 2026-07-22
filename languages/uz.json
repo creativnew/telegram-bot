@@ -101,5 +101,6 @@
   "btn_polls": "📊 Ovoz berish",
   "btn_backup": "💾 Zaxira",
   "btn_log_channel": "📝 Log kanal",
-  "btn_blocklist": "🚷 Blok royhat"
+  "btn_blocklist": "🚷 Blok royhat",
+  "start_welcome": "👋 <b>Xush kelibsiz, {name}!</b>\n\n✅ Til muvaffaqiyatli tanlandi.\n\nBot guruhni avtomatik nazorat qiladi:\n• Verifikatsiya\n• Anti-reklama\n• Anti-bot\n• Anti-sokinish\n\nAdmin panel: /panel"
 }

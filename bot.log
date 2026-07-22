@@ -451,3 +451,118 @@ aiogram.utils.exceptions.NetworkError: Aiohttp client throws an error: ServerDis
 2026-07-22 18:00:38,051 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
 2026-07-22 18:00:38,052 - __main__ - INFO - ============================================================
 2026-07-22 18:00:38,052 - aiogram.dispatcher.dispatcher - INFO - Start polling.
+2026-07-22 18:13:09,499 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 18:13:09,858 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 18:13:09,858 - __main__ - INFO - ============================================================
+2026-07-22 18:13:09,860 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 18:13:09,861 - __main__ - INFO - ============================================================
+2026-07-22 18:13:09,888 - __main__ - INFO - ✅ Database connected
+2026-07-22 18:13:09,891 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 18:13:10,044 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 18:13:10,318 - __main__ - INFO - ✅ Commands set
+2026-07-22 18:13:10,495 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 18:13:10,496 - __main__ - INFO - ============================================================
+2026-07-22 18:13:10,496 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 18:13:10,496 - __main__ - INFO - ============================================================
+2026-07-22 18:13:10,497 - aiogram.dispatcher.dispatcher - INFO - Start polling.
+2026-07-22 18:13:18,936 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-12' coro=<Dispatcher._process_polling_updates() done, defined at C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py:407> exception=OperationalError('no such column: language')>
+Traceback (most recent call last):
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\handlers\admin_handler.py", line 53, in cmd_panel
+    lang = await db.get_user_language(user_id) or 'uz'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\database.py", line 506, in get_user_language
+    async with self._connection.execute(
+               ~~~~~~~~~~~~~~~~~~~~~~~~^
+        'SELECT language FROM users WHERE user_id = ?', (user_id,)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as cursor:
+    ^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiosqlite\context.py", line 39, in __aenter__
+    self._obj = await self._coro
+                ^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiosqlite\core.py", line 190, in execute
+    cursor = await self._execute(self._conn.execute, sql, parameters)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiosqlite\core.py", line 133, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiosqlite\core.py", line 106, in run
+    result = function()
+sqlite3.OperationalError: no such column: language
+2026-07-22 18:20:26,191 - __main__ - INFO - ============================================================
+2026-07-22 18:20:26,191 - __main__ - INFO - 🛑 Bot to'xtatilmoqda...
+2026-07-22 18:20:26,192 - __main__ - INFO - ============================================================
+2026-07-22 18:20:26,193 - __main__ - INFO - ✅ Database closed
+2026-07-22 18:20:26,193 - __main__ - INFO - 👋 Xayr!
+2026-07-22 18:20:26,194 - aiogram.dispatcher.dispatcher - INFO - Stop polling...
+2026-07-22 18:20:26,195 - aiogram.dispatcher.dispatcher - ERROR - Cause exception while getting updates.
+Traceback (most recent call last):
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\bot\api.py", line 139, in make_request
+    async with session.post(url, data=req, **kwargs) as response:
+               ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client.py", line 1693, in __aenter__
+    self._resp: _RetType_co = await self._coro
+                              ^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client.py", line 858, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client.py", line 836, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\client_reqrep.py", line 558, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiohttp\streams.py", line 705, in read
+    await self._waiter
+aiohttp.client_exceptions.ServerDisconnectedError: Server disconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 381, in start_polling
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\bot\bot.py", line 110, in get_updates
+    result = await self.request(api.Methods.GET_UPDATES, payload)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\bot\base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                  proxy=self.proxy, proxy_auth=self.proxy_auth, timeout=self.timeout, **kwargs)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\bot\api.py", line 142, in make_request
+    raise exceptions.NetworkError(f"aiohttp client throws an error: {e.__class__.__name__}: {e}")
+aiogram.utils.exceptions.NetworkError: Aiohttp client throws an error: ServerDisconnectedError: Server disconnected
+2026-07-22 18:20:26,204 - aiogram - WARNING - Goodbye!
+2026-07-22 18:21:19,787 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 18:21:20,548 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 18:21:20,549 - __main__ - INFO - ============================================================
+2026-07-22 18:21:20,550 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 18:21:20,550 - __main__ - INFO - ============================================================
+2026-07-22 18:21:20,571 - __main__ - INFO - ✅ Database connected
+2026-07-22 18:21:20,574 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 18:21:20,828 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 18:21:21,048 - __main__ - INFO - ✅ Commands set
+2026-07-22 18:21:21,284 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 18:21:21,285 - __main__ - INFO - ============================================================
+2026-07-22 18:21:21,285 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 18:21:21,285 - __main__ - INFO - ============================================================
+2026-07-22 18:21:21,285 - aiogram.dispatcher.dispatcher - INFO - Start polling.
