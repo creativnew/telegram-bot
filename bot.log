@@ -1002,3 +1002,17 @@ Traceback (most recent call last):
   File "C:\Users\DELL PC\Desktop\telegram_bot_aiogram2x\venv\Lib\site-packages\aiogram\utils\exceptions.py", line 140, in detect
     raise err(cls.text or description)
 aiogram.utils.exceptions.MessageNotModified: Message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2026-07-22 21:43:08,103 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 21:43:08,421 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 21:43:08,422 - __main__ - INFO - ============================================================
+2026-07-22 21:43:08,423 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 21:43:08,423 - __main__ - INFO - ============================================================
+2026-07-22 21:43:08,482 - __main__ - INFO - ✅ Database connected
+2026-07-22 21:43:08,487 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 21:43:08,593 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 21:43:08,901 - __main__ - INFO - ✅ Commands set
+2026-07-22 21:43:09,210 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 21:43:09,210 - __main__ - INFO - ============================================================
+2026-07-22 21:43:09,211 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 21:43:09,211 - __main__ - INFO - ============================================================
+2026-07-22 21:43:09,211 - aiogram.dispatcher.dispatcher - INFO - Start polling.
