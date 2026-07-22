@@ -24,6 +24,7 @@ class DatabaseManager:
         self._connection = await aiosqlite.connect(self.db_path)
         self._connection.row_factory = aiosqlite.Row
         await self._create_tables()
+        await self._migrate()
         await self._init_default_settings()
         return self
 
@@ -31,6 +32,29 @@ class DatabaseManager:
         """Bazadan uzilish"""
         if self._connection:
             await self._connection.close()
+
+    async def _migrate(self):
+        """Eski bazaga yangi ustunlarni qo'shish"""
+        try:
+            await self._connection.execute("ALTER TABLE users ADD COLUMN language TEXT DEFAULT 'uz'")
+        except Exception:
+            pass  # Ustun allaqachon mavjud
+        try:
+            await self._connection.execute("ALTER TABLE users ADD COLUMN verified_by INTEGER")
+        except Exception:
+            pass
+        try:
+            await self._connection.execute("ALTER TABLE users ADD COLUMN verified_at TIMESTAMP")
+        except Exception:
+            pass
+        try:
+            await self._connection.execute("ALTER TABLE users ADD COLUMN is_female INTEGER DEFAULT 0")
+        except Exception:
+            pass
+        try:
+            await self._connection.execute("ALTER TABLE users ADD COLUMN notes TEXT")
+        except Exception:
+            pass
 
     async def _create_tables(self):
         """Barcha jadvallarni yaratish"""

@@ -437,3 +437,17 @@ Traceback (most recent call last):
     raise exceptions.NetworkError(f"aiohttp client throws an error: {e.__class__.__name__}: {e}")
 aiogram.utils.exceptions.NetworkError: Aiohttp client throws an error: ServerDisconnectedError: Server disconnected
 2026-07-22 12:15:39,054 - aiogram - WARNING - Goodbye!
+2026-07-22 18:00:37,154 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 18:00:37,487 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 18:00:37,487 - __main__ - INFO - ============================================================
+2026-07-22 18:00:37,487 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 18:00:37,487 - __main__ - INFO - ============================================================
+2026-07-22 18:00:37,512 - __main__ - INFO - ✅ Database connected
+2026-07-22 18:00:37,515 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 18:00:37,678 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 18:00:37,840 - __main__ - INFO - ✅ Commands set
+2026-07-22 18:00:38,051 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 18:00:38,051 - __main__ - INFO - ============================================================
+2026-07-22 18:00:38,051 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 18:00:38,052 - __main__ - INFO - ============================================================
+2026-07-22 18:00:38,052 - aiogram.dispatcher.dispatcher - INFO - Start polling.
