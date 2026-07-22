@@ -105,6 +105,11 @@ def router(dp: Dispatcher):
         )
         await callback.answer()
 
+    @dp.callback_query_handler(lambda c: c.data == "start_back")
+    async def start_back(callback: types.CallbackQuery):
+        await cmd_start(callback.message)
+        await callback.answer()
+
     @dp.callback_query_handler(lambda c: c.data.startswith("start_lang:"))
     async def set_start_language(callback: types.CallbackQuery):
         user = callback.from_user

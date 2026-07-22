@@ -257,6 +257,7 @@ def get_start_language_keyboard() -> InlineKeyboardMarkup:
             [InlineKeyboardButton(text="🇺🇿 O'zbekcha", callback_data="start_lang:uz")],
             [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="start_lang:ru")],
             [InlineKeyboardButton(text="🇺🇸 English", callback_data="start_lang:en")],
+            [InlineKeyboardButton(text="🔙 Orqaga", callback_data="start_back")],
         ]
     )
     return keyboard
