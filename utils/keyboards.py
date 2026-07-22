@@ -159,25 +159,27 @@ def get_stats_keyboard() -> InlineKeyboardMarkup:
     return keyboard
 
 
-def get_main_menu_keyboard(lang: str = 'uz') -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text=get_text('btn_security_section', lang), callback_data="sec_main"),
-                InlineKeyboardButton(text=get_text('btn_users_section', lang), callback_data="users_main"),
-                InlineKeyboardButton(text=get_text('btn_management_section', lang), callback_data="mgmt_main"),
-            ],
-            [
-                InlineKeyboardButton(text=get_text('btn_stats', lang), callback_data="stats_main"),
-                InlineKeyboardButton(text=get_text('btn_broadcast', lang), callback_data="broadcast"),
-                InlineKeyboardButton(text=get_text('btn_admins', lang), callback_data="admins_main"),
-            ],
-            [
-                InlineKeyboardButton(text=get_text('btn_language', lang), callback_data="lang"),
-            ],
-        ]
-    )
-    return keyboard
+def get_main_menu_keyboard(lang: str = 'uz', show_bot_settings: bool = False) -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(text=get_text('btn_security_section', lang), callback_data="sec_main"),
+            InlineKeyboardButton(text=get_text('btn_users_section', lang), callback_data="users_main"),
+            InlineKeyboardButton(text=get_text('btn_management_section', lang), callback_data="mgmt_main"),
+        ],
+        [
+            InlineKeyboardButton(text=get_text('btn_stats', lang), callback_data="stats_main"),
+            InlineKeyboardButton(text=get_text('btn_broadcast', lang), callback_data="broadcast"),
+            InlineKeyboardButton(text=get_text('btn_admins', lang), callback_data="admins_main"),
+        ],
+        [
+            InlineKeyboardButton(text=get_text('btn_language', lang), callback_data="lang"),
+        ],
+    ]
+    if show_bot_settings:
+        rows.append([
+            InlineKeyboardButton(text=get_text('btn_bot_settings', lang), callback_data="bot_settings"),
+        ])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def get_security_keyboard(
@@ -228,28 +230,24 @@ def get_language_keyboard(lang='uz') -> InlineKeyboardMarkup:
     return keyboard
 
 
-def get_grouphelp_keyboard() -> InlineKeyboardMarkup:
-    from config import GROUP_LINK, CHANNEL_LINK, SUPPORT_LINK
-    buttons = []
+def get_grouphelp_keyboard(bot_username='', group_link='', channel_link='', support_link='') -> InlineKeyboardMarkup:
+    add_url = group_link or f"https://t.me/{bot_username}?startgroup=admin" if bot_username else "https://t.me/"
+    group_url = group_link or "https://t.me/"
+    channel_url = channel_link or "https://t.me/"
+    support_url = support_link or "https://t.me/"
 
-    row1 = []
-    row1.append(InlineKeyboardButton(text="➕ Добавить меня в группу", url=GROUP_LINK or "https://t.me/"))
-    buttons.append(row1)
-
-    row2 = []
-    row2.append(InlineKeyboardButton(text="👥 Группа", url=GROUP_LINK or "https://t.me/"))
-    row2.append(InlineKeyboardButton(text="📢 Канал", url=CHANNEL_LINK or "https://t.me/"))
-    buttons.append(row2)
-
-    row3 = []
-    row3.append(InlineKeyboardButton(text="🆘 Поддержка", url=SUPPORT_LINK or "https://t.me/"))
-    row3.append(InlineKeyboardButton(text="ℹ️ Информация", callback_data="help"))
-    buttons.append(row3)
-
-    row4 = []
-    row4.append(InlineKeyboardButton(text="🌐 Languages", callback_data="start_lang_menu"))
-    buttons.append(row4)
-
+    buttons = [
+        [InlineKeyboardButton(text="➕ Добавить меня в группу", url=add_url)],
+        [
+            InlineKeyboardButton(text="👥 Группа", url=group_url),
+            InlineKeyboardButton(text="📢 Канал", url=channel_url),
+        ],
+        [
+            InlineKeyboardButton(text="🆘 Поддержка", url=support_url),
+            InlineKeyboardButton(text="ℹ️ Информация", callback_data="help"),
+        ],
+        [InlineKeyboardButton(text="🌐 Languages", callback_data="start_lang_menu")],
+    ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 

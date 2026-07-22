@@ -34,6 +34,11 @@ class Admin(StatesGroup):
     ADD_ID = State()
     REMOVE_ID = State()
 
+class BotLinks(StatesGroup):
+    WAITING_GROUP_LINK = State()
+    WAITING_CHANNEL_LINK = State()
+    WAITING_SUPPORT_LINK = State()
+
 
 def router(dp: Dispatcher):
 
@@ -64,7 +69,7 @@ def router(dp: Dispatcher):
         await message.answer(
             text,
             parse_mode='HTML',
-            reply_markup=get_main_menu_keyboard(lang)
+            reply_markup=get_main_menu_keyboard(lang, show_bot_settings=(user_id == OWNER_ID))
         )
 
     # ============================================================
@@ -357,7 +362,7 @@ def router(dp: Dispatcher):
                 await callback.message.edit_text(
                     text,
                     parse_mode='HTML',
-                    reply_markup=get_main_menu_keyboard(lang)
+                    reply_markup=get_main_menu_keyboard(lang, show_bot_settings=(user_id == OWNER_ID))
                 )
             except Exception:
                 pass
@@ -391,11 +396,113 @@ def router(dp: Dispatcher):
             await callback.message.edit_text(
                 text,
                 parse_mode='HTML',
-                reply_markup=get_main_menu_keyboard(lang)
+                reply_markup=get_main_menu_keyboard(lang, show_bot_settings=(user_id == OWNER_ID))
             )
         except Exception:
             pass
         await callback.answer()
+
+    # ============================================================
+    # BOT SETTINGS (owner only)
+    # ============================================================
+
+    @dp.callback_query_handler(lambda c: c.data == "bot_settings")
+    async def show_bot_settings(callback: types.CallbackQuery):
+        user_id = callback.from_user.id
+        if user_id != OWNER_ID:
+            await callback.answer("❌ Faqat egasi!", show_alert=True)
+            return
+        lang = await db.get_user_language(user_id) or 'uz'
+        links = await db.get_bot_links()
+
+        text = (
+            f"⚙️ <b>Bot sozlamalari</b>\n\n"
+            f"👥 Guruh: {links['group_link'] or '❌ Sozlanmagan'}\n"
+            f"📢 Kanal: {links['channel_link'] or '❌ Sozlanmagan'}\n"
+            f"🆘 Support: {links['support_link'] or '❌ Sozlanmagan'}\n\n"
+            f"Quyidagi tugmalar orqali linklarni o'zgartiring:"
+        )
+
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="👥 Guruh linki", callback_data="bot_set:group")],
+            [InlineKeyboardButton(text="📢 Kanal linki", callback_data="bot_set:channel")],
+            [InlineKeyboardButton(text="🆘 Support linki", callback_data="bot_set:support")],
+            [InlineKeyboardButton(text=get_text('btn_back', lang), callback_data="panel_back")],
+        ])
+        await callback.message.edit_text(text, parse_mode='HTML', reply_markup=keyboard)
+        await callback.answer()
+
+    @dp.callback_query_handler(lambda c: c.data.startswith("bot_set:"))
+    async def start_set_link(callback: types.CallbackQuery):
+        user_id = callback.from_user.id
+        if user_id != OWNER_ID:
+            await callback.answer("❌", show_alert=True)
+            return
+        link_type = callback.data.split(":")[1]
+        lang = await db.get_user_language(user_id) or 'uz'
+
+        names = {'group': '👥 Guruh', 'channel': '📢 Kanal', 'support': '🆘 Support'}
+        name = names.get(link_type, link_type)
+        states = {'group': BotLinks.WAITING_GROUP_LINK, 'channel': BotLinks.WAITING_CHANNEL_LINK, 'support': BotLinks.WAITING_SUPPORT_LINK}
+        state = states.get(link_type)
+        if not state:
+            await callback.answer()
+            return
+
+        await state.set()
+        async with dp.current_state(user=user_id, chat=user_id) as fsm:
+            await fsm.update_data(link_type=link_type)
+
+        await callback.message.edit_text(
+            f"{name} linkini yuboring.\nMisol: <code>https://t.me/your_group</code>\n\n/cancel - Bekor qilish",
+            parse_mode='HTML'
+        )
+        await callback.answer()
+
+    @dp.message_handler(state=BotLinks.WAITING_GROUP_LINK)
+    async def set_group_link(message: types.Message, state: FSMContext):
+        user_id = message.from_user.id
+        if user_id != OWNER_ID:
+            await state.finish()
+            return
+        text = message.text.strip()
+        if text.lower() == '/cancel':
+            await state.finish()
+            await message.answer("❌ Bekor qilindi.")
+            return
+        await db.set_setting('group_link', text)
+        await state.finish()
+        await message.answer("✅ Guruh linki saqlandi!\n\n/panel orqali tekshiring.")
+
+    @dp.message_handler(state=BotLinks.WAITING_CHANNEL_LINK)
+    async def set_channel_link(message: types.Message, state: FSMContext):
+        user_id = message.from_user.id
+        if user_id != OWNER_ID:
+            await state.finish()
+            return
+        text = message.text.strip()
+        if text.lower() == '/cancel':
+            await state.finish()
+            await message.answer("❌ Bekor qilindi.")
+            return
+        await db.set_setting('channel_link', text)
+        await state.finish()
+        await message.answer("✅ Kanal linki saqlandi!\n\n/panel orqali tekshiring.")
+
+    @dp.message_handler(state=BotLinks.WAITING_SUPPORT_LINK)
+    async def set_support_link(message: types.Message, state: FSMContext):
+        user_id = message.from_user.id
+        if user_id != OWNER_ID:
+            await state.finish()
+            return
+        text = message.text.strip()
+        if text.lower() == '/cancel':
+            await state.finish()
+            await message.answer("❌ Bekor qilindi.")
+            return
+        await db.set_setting('support_link', text)
+        await state.finish()
+        await message.answer("✅ Support linki saqlandi!\n\n/panel orqali tekshiring.")
 
     # ============================================================
     # /stats COMMAND

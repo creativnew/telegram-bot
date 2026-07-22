@@ -2,28 +2,13 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Command
 
 from database import db
-from config import OWNER_ID, PREMIUM_STICKER, GROUP_LINK, CHANNEL_LINK, SUPPORT_LINK
+from config import OWNER_ID, PREMIUM_STICKER
 from utils.keyboards import (
     get_grouphelp_keyboard, get_start_language_keyboard,
     get_start_keyboard, get_language_keyboard
 )
 from utils.language import get_text
 from utils.helpers import Logger
-
-
-WELCOME_TEXT = (
-    "<b>👋 Welcome to Group Help Bot!</b>\n\n"
-    "• This bot helps you manage your groups\n"
-    "• Anti-spam, verification, anti-link and more\n"
-    "• Add me to your group and give me admin rights\n\n"
-
-    "<b>👋 Добро пожаловать в Group Help Bot!</b>\n\n"
-    "• Этот бот помогает управлять группами\n"
-    "• Анти-спам, верификация, анти-ссылки и другое\n"
-    "• Добавьте меня в вашу группу и дайте права админа\n\n"
-
-    "👑 <b>1 357 413</b> monthly users"
-)
 
 
 async def _send_personal_welcome(bot, message, user, lang):
@@ -75,10 +60,34 @@ def router(dp: Dispatcher):
             await _send_personal_welcome(bot, message, user, existing_lang)
             return
 
+        bot_me = await bot.get_me()
+        bot_name = bot_me.first_name
+        bot_username = bot_me.username
+        await db.set_setting('bot_username', bot_username)
+
+        links = await db.get_bot_links()
+        group_link = links['group_link'] or f"https://t.me/{bot_username}?startgroup=admin"
+        channel_link = links['channel_link']
+        support_link = links['support_link']
+
+        text = (
+            f"<b>👋 {bot_name} ga xush kelibsiz!</b>\n\n"
+            f"• Bu bot guruhlaringizni boshqarishga yordam beradi\n"
+            f"• Anti-spam, verifikatsiya, anti-link va boshqalar\n"
+            f"• Meni guruhingizga qo'shing va admin huquqini bering\n\n"
+
+            f"<b>👋 Добро пожаловать в {bot_name}!</b>\n\n"
+            f"• Этот бот помогает управлять группами\n"
+            f"• Анти-спам, верификация, анти-ссылки и другое\n"
+            f"• Добавьте меня в вашу группу и дайте права админа\n\n"
+
+            f"👑 <b>1 357 413</b> monthly users"
+        )
+
         await message.answer(
-            WELCOME_TEXT,
+            text,
             parse_mode='HTML',
-            reply_markup=get_grouphelp_keyboard()
+            reply_markup=get_grouphelp_keyboard(bot_username, group_link, channel_link, support_link)
         )
 
         if PREMIUM_STICKER:
@@ -115,10 +124,32 @@ def router(dp: Dispatcher):
 
     @dp.callback_query_handler(lambda c: c.data == "help")
     async def callback_help(callback: types.CallbackQuery):
+        bot_me = await dp.bot.get_me()
+        bot_name = bot_me.first_name
+        bot_username = bot_me.username
+        links = await db.get_bot_links()
+        group_link = links['group_link'] or f"https://t.me/{bot_username}?startgroup=admin"
+        channel_link = links['channel_link']
+        support_link = links['support_link']
+
+        text = (
+            f"<b>👋 {bot_name} ga xush kelibsiz!</b>\n\n"
+            f"• Bu bot guruhlaringizni boshqarishga yordam beradi\n"
+            f"• Anti-spam, verifikatsiya, anti-link va boshqalar\n"
+            f"• Meni guruhingizga qo'shing va admin huquqini bering\n\n"
+
+            f"<b>👋 Добро пожаловать в {bot_name}!</b>\n\n"
+            f"• Этот бот помогает управлять группами\n"
+            f"• Анти-спам, верификация, анти-ссылки и другое\n"
+            f"• Добавьте меня в вашу группу и дайте права админа\n\n"
+
+            f"👑 <b>1 357 413</b> monthly users"
+        )
+
         await callback.message.edit_text(
-            WELCOME_TEXT,
+            text,
             parse_mode='HTML',
-            reply_markup=get_grouphelp_keyboard()
+            reply_markup=get_grouphelp_keyboard(bot_username, group_link, channel_link, support_link)
         )
         await callback.answer()
 

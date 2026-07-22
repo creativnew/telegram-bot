@@ -39,10 +39,7 @@ MUTE_DURATION_HOURS = 24
 # @StickerDownloadBot dan olishingiz mumkin
 PREMIUM_STICKER = None  # "CAACAgIAAxkBAA..."
 
-# 9. Gruh/kanal havolalari (GroupHelpBot uchun)
-GROUP_LINK = None  # "https://t.me/your_group"
-CHANNEL_LINK = None  # "https://t.me/your_channel"
-SUPPORT_LINK = None  # "https://t.me/your_support"
+
 
 # ============================================================
 # QO'SHIMCHA SOZLAMALAR

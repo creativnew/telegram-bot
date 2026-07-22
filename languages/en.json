@@ -102,5 +102,6 @@
   "btn_backup": "💾 Backup",
   "btn_log_channel": "📝 Log channel",
   "btn_blocklist": "🚷 Block list",
+  "btn_bot_settings": "⚙️ Bot settings",
   "start_welcome": "👋 <b>Welcome, {name}!</b>\n\n✅ Language selected successfully.\n\nBot automatically controls the group:\n• Verification\n• Anti-link\n• Anti-bot\n• Anti-swear\n\nAdmin panel: /panel"
 }

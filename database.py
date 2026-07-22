@@ -190,6 +190,9 @@ class DatabaseManager:
             'log_channel_enabled': '0',
             'blocklist_enabled': '0',
             'group_link': '',
+            'channel_link': '',
+            'support_link': '',
+            'bot_username': '',
             'group_name': 'Ayollar Guruhi',
             'bot_language': 'uz',
             'flood_limit': '3',
@@ -357,6 +360,15 @@ class DatabaseManager:
         except Exception as e:
             print(f"Error setting {key}: {e}")
             return False
+
+    async def get_bot_links(self) -> dict:
+        """Barcha bot havolalarini olish"""
+        return {
+            'group_link': await self.get_setting('group_link', ''),
+            'channel_link': await self.get_setting('channel_link', ''),
+            'support_link': await self.get_setting('support_link', ''),
+            'bot_username': await self.get_setting('bot_username', ''),
+        }
 
     async def toggle_setting(self, key: str) -> bool:
         """Sozlamani yoqish/o'chirish (toggle)"""
