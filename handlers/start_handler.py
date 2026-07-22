@@ -135,7 +135,7 @@ def router(dp: Dispatcher):
         text = (
             f"ℹ️ <b>{bot_name}</b>\n\n"
             f"<b>🤖 Versiya:</b> 2.0\n"
-            f"<b>👑 Egasi:</b> @Shaxa__0616\n\n"
+            f"<b>👑 Egasi:</b> <a href=\"https://t.me/Shaxa_0616\">@Shaxa_0616</a>\n\n"
             f"<b>📋 Imkoniyatlar:</b>\n"
             f"• 🛡️ <b>Himoya:</b> Anti-flood, Anti-spam, Anti-porn, Captcha, Night mode, Word filter, Media restrict, Invite restrict\n"
             f"• 👤 <b>Foydalanuvchilar:</b> /info, Name history, Reyting, Qidirish\n"

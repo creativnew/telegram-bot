@@ -1030,3 +1030,17 @@ aiogram.utils.exceptions.MessageNotModified: Message is not modified: specified 
 2026-07-22 21:45:04,943 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
 2026-07-22 21:45:04,943 - __main__ - INFO - ============================================================
 2026-07-22 21:45:04,943 - aiogram.dispatcher.dispatcher - INFO - Start polling.
+2026-07-22 21:47:29,946 - aiogram - INFO - Bot: Nazoratchi [@Guruh_nazoratch1_bot]
+2026-07-22 21:47:30,254 - aiogram - WARNING - Updates were skipped successfully.
+2026-07-22 21:47:30,254 - __main__ - INFO - ============================================================
+2026-07-22 21:47:30,255 - __main__ - INFO - 🤖 Bot ishga tushmoqda...
+2026-07-22 21:47:30,256 - __main__ - INFO - ============================================================
+2026-07-22 21:47:30,308 - __main__ - INFO - ✅ Database connected
+2026-07-22 21:47:30,312 - __main__ - INFO - ✅ Owner configured: 8489964401
+2026-07-22 21:47:30,552 - __main__ - INFO - ✅ Bot: @Guruh_nazoratch1_bot (ID: 8780396351)
+2026-07-22 21:47:30,735 - __main__ - INFO - ✅ Commands set
+2026-07-22 21:47:30,933 - __main__ - INFO - ✅ Startup notification sent to owner 8489964401
+2026-07-22 21:47:30,933 - __main__ - INFO - ============================================================
+2026-07-22 21:47:30,934 - __main__ - INFO - 🚀 Bot muvaffaqiyatli ishga tushdi!
+2026-07-22 21:47:30,934 - __main__ - INFO - ============================================================
+2026-07-22 21:47:30,935 - aiogram.dispatcher.dispatcher - INFO - Start polling.
