@@ -30,7 +30,7 @@ async def _send_personal_welcome(bot, message, user, lang):
         await message.answer(text, parse_mode='HTML')
     else:
         text = get_text('start_welcome', lang, name=user.first_name)
-        await message.answer(text, parse_mode='HTML')
+        await message.answer(text, parse_mode='HTML', disable_web_page_preview=True)
 
     if PREMIUM_STICKER:
         try:
@@ -141,7 +141,12 @@ def router(dp: Dispatcher):
             f"• 👤 <b>Foydalanuvchilar:</b> /info, Name history, Reyting, Qidirish\n"
             f"• ⚙️ <b>Boshqaruv:</b> Welcome, Qoidalar, Auto-reply, Scheduled, Polls, Backup, Log, Blocklist\n"
             f"• 🔐 <b>Verifikatsiya:</b> Ism, Telefon, Selfi orqali tekshirish\n"
-            f"• 🤖 <b>Anti-bot:</b> Boshqa botlarni avtomatik bloklash\n\n"
+            f"• 🤖 <b>Anti-bot:</b> Boshqa botlarni avtomatik bloklash\n"
+            f"• 🚨 <b>Anti-raid:</b> Ommaviy qo'shilishlardan himoya\n"
+            f"• 🆕 <b>Yangi a'zo cheklovi:</b> Yangi a'zolarga media cheklash\n"
+            f"• 🗑 <b>Xizmat xabarlarini o'chirish:</b> \"Qo'shildi/Chiqdi\" xabarlarini avto-o'chirish\n"
+            f"• 📛 <b>Bio/Username filtri:</b> Profildagi reklamani filtr\n"
+            f"• 🔧 <b>Asboblar:</b> So'z filtri, Qora ro'yxat, Qoidalar, Avto-javob, Log kanal, Export/Import\n\n"
             f"<b>🌐 Til:</b> O'zbekcha, Русский, English\n\n"
             f"<b>📌 Qanday ishlatish:</b>\n"
             f"1. Meni guruhingizga qo'shing\n"

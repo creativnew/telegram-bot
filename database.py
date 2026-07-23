@@ -2,22 +2,38 @@
 ╔══════════════════════════════════════════════════════════════╗
 ║              DATABASE MANAGER - Ma'lumotlar Bazasi           ║
 ║              SQLite3 + aiosqlite (Async)                     ║
+║              Enhanced with Security Measures                  ║
 ╚══════════════════════════════════════════════════════════════╝
 """
 
 import aiosqlite
 import asyncio
+import hashlib
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from config import DATABASE_PATH, WARN_LIMIT, MUTE_DURATION_HOURS
 
 
 class DatabaseManager:
-    """Asinxron ma'lumotlar bazasi boshqaruvchisi"""
+    """Asinxron ma'lumotlar bazasi boshqaruvchisi with security"""
 
     def __init__(self, db_path: str = DATABASE_PATH):
         self.db_path = db_path
         self._connection: Optional[aiosqlite.Connection] = None
+
+    @staticmethod
+    def hash_sensitive_data(data: str) -> str:
+        """Sensitive ma'lumotlarni hash qilish"""
+        if not data:
+            return ""
+        return hashlib.sha256(data.encode('utf-8')).hexdigest()
+
+    @staticmethod
+    def verify_hash(data: str, hashed: str) -> bool:
+        """Hashni tekshirish"""
+        if not data or not hashed:
+            return False
+        return hashlib.sha256(data.encode('utf-8')).hexdigest() == hashed
 
     async def connect(self):
         """Bazaga ulanish"""
@@ -156,6 +172,95 @@ class DatabaseManager:
             )
         """)
 
+        # Filtrlangan so'zlar jadvali (So'z filtri)
+        await self._connection.execute("""
+            CREATE TABLE IF NOT EXISTS filtered_words (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                word TEXT UNIQUE NOT NULL,
+                added_by INTEGER,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Qora ro'yxat jadvali (Blocklist)
+        await self._connection.execute("""
+            CREATE TABLE IF NOT EXISTS blocklist (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER UNIQUE NOT NULL,
+                reason TEXT,
+                added_by INTEGER,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Qo'shilishlar kuzatuvi (Anti-raid)
+        await self._connection.execute("""
+            CREATE TABLE IF NOT EXISTS join_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                group_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Captcha jadvali
+        await self._connection.execute("""
+            CREATE TABLE IF NOT EXISTS captcha (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER UNIQUE NOT NULL,
+                group_id INTEGER NOT NULL,
+                answer TEXT NOT NULL,
+                message_id INTEGER,
+                attempts INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Qoidalar jadvali
+        await self._connection.execute("""
+            CREATE TABLE IF NOT EXISTS rules (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                group_id INTEGER UNIQUE NOT NULL,
+                text TEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Yangi a'zolarni kuzatish (message count)
+        await self._connection.execute("""
+            CREATE TABLE IF NOT EXISTS new_member_track (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                group_id INTEGER NOT NULL,
+                msg_count INTEGER DEFAULT 0,
+                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, group_id)
+            )
+        """)
+
+        # Avto-javoblar jadvali
+        await self._connection.execute("""
+            CREATE TABLE IF NOT EXISTS autoreplies (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                group_id INTEGER,
+                keyword TEXT NOT NULL,
+                reply TEXT NOT NULL,
+                is_active INTEGER DEFAULT 1
+            )
+        """)
+
+        # Guruh sozlamalari jadvali (per-group settings)
+        await self._connection.execute("""
+            CREATE TABLE IF NOT EXISTS group_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                group_id INTEGER NOT NULL,
+                key TEXT NOT NULL,
+                value TEXT NOT NULL DEFAULT '0',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(group_id, key)
+            )
+        """)
+
         await self._connection.commit()
 
     async def _init_default_settings(self):
@@ -201,6 +306,15 @@ class DatabaseManager:
             'night_end': '08:00',
             'custom_words': '',
             'media_type': '0',
+            'anti_raid_enabled': '0',
+            'raid_limit': '10',
+            'raid_interval': '60',
+            'new_member_restrict_enabled': '0',
+            'new_member_msg_limit': '5',
+            'service_msg_delete_enabled': '0',
+            'bio_filter_enabled': '0',
+            'captcha_difficulty': 'easy',
+            'rules_text': '',
         }
 
         for key, value in defaults.items():
@@ -381,6 +495,95 @@ class DatabaseManager:
         """Boolean sozlama olish"""
         value = await self.get_setting(key, '0')
         return value == '1'
+
+    # ============================================================
+    # PER-GROUP SETTINGS - Guruh sozlamalari
+    # ============================================================
+
+    async def get_group_setting(self, group_id: int, key: str, default: str = None) -> str:
+        """Guruh sozlamasini olish (globaldan farqli)"""
+        async with self._connection.execute(
+            'SELECT value FROM group_settings WHERE group_id = ? AND key = ?',
+            (group_id, key)
+        ) as cursor:
+            row = await cursor.fetchone()
+            if row:
+                return row['value']
+            return default
+
+    async def set_group_setting(self, group_id: int, key: str, value: str) -> bool:
+        """Guruh sozlamasini o'zgartirish"""
+        try:
+            await self._connection.execute("""
+                INSERT OR REPLACE INTO group_settings (group_id, key, value, updated_at)
+                VALUES (?, ?, ?, ?)
+            """, (group_id, key, value, datetime.now()))
+            await self._connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error setting group {group_id} {key}: {e}")
+            return False
+
+    async def toggle_group_setting(self, group_id: int, key: str) -> bool:
+        """Guruh sozlamasini yoqish/o'chirish"""
+        current = await self.get_group_setting(group_id, key, '0')
+        new_value = '0' if current == '1' else '1'
+        await self.set_group_setting(group_id, key, new_value)
+        return new_value == '1'
+
+    async def get_group_bool_setting(self, group_id: int, key: str) -> bool:
+        """Guruh boolean sozlamasini olish (globalga fallback bilan)"""
+        value = await self.get_group_setting(group_id, key, None)
+        if value is None:
+            value = await self.get_setting(key, '0')
+        return value == '1'
+
+    async def get_all_group_settings(self, group_id: int) -> dict:
+        """Guruhning barcha sozlamalarini olish"""
+        settings = {}
+        async with self._connection.execute(
+            'SELECT key, value FROM group_settings WHERE group_id = ?',
+            (group_id,)
+        ) as cursor:
+            rows = await cursor.fetchall()
+            for row in rows:
+                settings[row['key']] = row['value']
+        return settings
+
+    async def reset_group_settings(self, group_id: int, category: str = None) -> int:
+        """Guruh sozlamalarini standart holatga qaytarish"""
+        default_map = {
+            'verification': ['verification_enabled', 'ask_photo_enabled', 'ask_phone_enabled'],
+            'security': ['antiflood_enabled', 'antispam_enabled', 'antiporn_enabled', 'captcha_enabled',
+                         'nightmode_enabled', 'wordfilter_enabled', 'media_restrict_enabled',
+                         'invite_restrict_enabled', 'anti_raid_enabled', 'new_member_restrict_enabled',
+                         'service_msg_delete_enabled', 'bio_filter_enabled'],
+            'users': ['userinfo_enabled', 'namehistory_enabled', 'user_ranking_enabled', 'user_search_enabled'],
+            'management': ['welcome_custom_enabled', 'rules_enabled', 'autoreply_enabled', 'scheduled_enabled',
+                           'polls_enabled', 'backup_enabled', 'log_channel_enabled', 'blocklist_enabled'],
+        }
+        if category == 'all':
+            keys = sum(default_map.values(), [])
+        elif category in default_map:
+            keys = default_map[category]
+        else:
+            return 0
+
+        count = 0
+        for key in keys:
+            # Default: 1 for verification/user features, 0 for others
+            default_val = '1' if key in ['verification_enabled', 'ask_photo_enabled', 'ask_phone_enabled',
+                                          'userinfo_enabled', 'namehistory_enabled', 'welcome_custom_enabled'] else '0'
+            try:
+                await self._connection.execute("""
+                    INSERT OR REPLACE INTO group_settings (group_id, key, value, updated_at)
+                    VALUES (?, ?, ?, ?)
+                """, (group_id, key, default_val, datetime.now()))
+                count += 1
+            except Exception:
+                pass
+        await self._connection.commit()
+        return count
 
     # ============================================================
     # WARNS - Ogohlantirishlar bilan ishlash
@@ -564,6 +767,290 @@ class DatabaseManager:
     async def set_bot_language(self, lang: str) -> bool:
         """Bot tilini o'zgartirish"""
         return await self.set_setting('bot_language', lang)
+
+    # ============================================================
+    # FILTERED WORDS - Filtrlangan so'zlar
+    # ============================================================
+
+    async def add_filtered_word(self, word: str, added_by: int = None) -> bool:
+        try:
+            await self._connection.execute(
+                'INSERT OR IGNORE INTO filtered_words (word, added_by) VALUES (?, ?)',
+                (word.lower().strip(), added_by))
+            await self._connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error adding filtered word: {e}")
+            return False
+
+    async def remove_filtered_word(self, word: str) -> bool:
+        try:
+            await self._connection.execute(
+                'DELETE FROM filtered_words WHERE word = ?', (word.lower().strip(),))
+            await self._connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error removing filtered word: {e}")
+            return False
+
+    async def get_filtered_words(self) -> List[str]:
+        async with self._connection.execute(
+            'SELECT word FROM filtered_words ORDER BY word'
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [row['word'] for row in rows]
+
+    # ============================================================
+    # BLOCKLIST - Qora ro'yxat
+    # ============================================================
+
+    async def add_to_blocklist(self, user_id: int, reason: str = None, added_by: int = None) -> bool:
+        try:
+            await self._connection.execute("""
+                INSERT OR REPLACE INTO blocklist (user_id, reason, added_by)
+                VALUES (?, ?, ?)""", (user_id, reason, added_by))
+            await self._connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error adding to blocklist: {e}")
+            return False
+
+    async def remove_from_blocklist(self, user_id: int) -> bool:
+        try:
+            await self._connection.execute(
+                'DELETE FROM blocklist WHERE user_id = ?', (user_id,))
+            await self._connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error removing from blocklist: {e}")
+            return False
+
+    async def is_blocked(self, user_id: int) -> bool:
+        async with self._connection.execute(
+            'SELECT 1 FROM blocklist WHERE user_id = ?', (user_id,)
+        ) as cursor:
+            return await cursor.fetchone() is not None
+
+    async def get_blocklist(self) -> List[Dict[str, Any]]:
+        async with self._connection.execute(
+            'SELECT * FROM blocklist ORDER BY added_at DESC'
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    # ============================================================
+    # JOIN LOG - Qo'shilishlar kuzatuvi (Anti-raid)
+    # ============================================================
+
+    async def log_join(self, group_id: int, user_id: int):
+        try:
+            await self._connection.execute(
+                'INSERT INTO join_log (group_id, user_id) VALUES (?, ?)',
+                (group_id, user_id))
+            await self._connection.commit()
+        except Exception:
+            pass
+
+    async def get_recent_joins(self, group_id: int, seconds: int = 60) -> int:
+        cutoff = datetime.now() - timedelta(seconds=seconds)
+        async with self._connection.execute(
+            'SELECT COUNT(*) as cnt FROM join_log WHERE group_id = ? AND joined_at >= ?',
+            (group_id, cutoff)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row['cnt'] if row else 0
+
+    async def clean_join_log(self, hours: int = 24):
+        cutoff = datetime.now() - timedelta(hours=hours)
+        await self._connection.execute(
+            'DELETE FROM join_log WHERE joined_at < ?', (cutoff,))
+        await self._connection.commit()
+
+    # ============================================================
+    # CAPTCHA
+    # ============================================================
+
+    async def save_captcha(self, user_id: int, group_id: int, answer: str, message_id: int = None) -> bool:
+        try:
+            await self._connection.execute("""
+                INSERT OR REPLACE INTO captcha (user_id, group_id, answer, message_id)
+                VALUES (?, ?, ?, ?)""", (user_id, group_id, answer, message_id))
+            await self._connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error saving captcha: {e}")
+            return False
+
+    async def get_captcha(self, user_id: int) -> Optional[Dict[str, Any]]:
+        async with self._connection.execute(
+            'SELECT * FROM captcha WHERE user_id = ?', (user_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return dict(row) if row else None
+
+    async def delete_captcha(self, user_id: int):
+        try:
+            await self._connection.execute('DELETE FROM captcha WHERE user_id = ?', (user_id,))
+            await self._connection.commit()
+        except Exception:
+            pass
+
+    async def increment_captcha_attempts(self, user_id: int) -> int:
+        await self._connection.execute(
+            'UPDATE captcha SET attempts = attempts + 1 WHERE user_id = ?', (user_id,))
+        await self._connection.commit()
+        async with self._connection.execute(
+            'SELECT attempts FROM captcha WHERE user_id = ?', (user_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row['attempts'] if row else 0
+
+    # ============================================================
+    # RULES - Qoidalar
+    # ============================================================
+
+    async def set_rules(self, group_id: int, text: str) -> bool:
+        try:
+            await self._connection.execute("""
+                INSERT OR REPLACE INTO rules (group_id, text, updated_at)
+                VALUES (?, ?, ?)""", (group_id, text, datetime.now()))
+            await self._connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error setting rules: {e}")
+            return False
+
+    async def get_rules(self, group_id: int) -> str:
+        async with self._connection.execute(
+            'SELECT text FROM rules WHERE group_id = ?', (group_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row['text'] if row else ''
+
+    # ============================================================
+    # NEW MEMBER TRACK - Yangi a'zolarni kuzatish
+    # ============================================================
+
+    async def track_new_member(self, user_id: int, group_id: int) -> bool:
+        try:
+            await self._connection.execute("""
+                INSERT OR IGNORE INTO new_member_track (user_id, group_id)
+                VALUES (?, ?)""", (user_id, group_id))
+            await self._connection.commit()
+            return True
+        except Exception:
+            return False
+
+    async def increment_msg_count(self, user_id: int, group_id: int) -> int:
+        await self._connection.execute("""
+            UPDATE new_member_track SET msg_count = msg_count + 1
+            WHERE user_id = ? AND group_id = ?""", (user_id, group_id))
+        await self._connection.commit()
+        async with self._connection.execute(
+            'SELECT msg_count FROM new_member_track WHERE user_id = ? AND group_id = ?',
+            (user_id, group_id)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row['msg_count'] if row else 0
+
+    async def get_msg_count(self, user_id: int, group_id: int) -> int:
+        async with self._connection.execute(
+            'SELECT msg_count FROM new_member_track WHERE user_id = ? AND group_id = ?',
+            (user_id, group_id)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row['msg_count'] if row else 0
+
+    async def remove_new_member_track(self, user_id: int, group_id: int):
+        await self._connection.execute(
+            'DELETE FROM new_member_track WHERE user_id = ? AND group_id = ?',
+            (user_id, group_id))
+        await self._connection.commit()
+
+    # ============================================================
+    # AUTOREPLIES - Avto-javoblar
+    # ============================================================
+
+    async def add_autoreply(self, keyword: str, reply: str, group_id: int = None) -> bool:
+        try:
+            await self._connection.execute("""
+                INSERT INTO autoreplies (group_id, keyword, reply)
+                VALUES (?, ?, ?)""", (group_id, keyword.lower().strip(), reply))
+            await self._connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error adding autoreply: {e}")
+            return False
+
+    async def remove_autoreply(self, keyword: str, group_id: int = None) -> bool:
+        try:
+            if group_id:
+                await self._connection.execute(
+                    'DELETE FROM autoreplies WHERE keyword = ? AND group_id = ?',
+                    (keyword.lower().strip(), group_id))
+            else:
+                await self._connection.execute(
+                    'DELETE FROM autoreplies WHERE keyword = ?', (keyword.lower().strip(),))
+            await self._connection.commit()
+            return True
+        except Exception:
+            return False
+
+    async def get_autoreply(self, keyword: str, group_id: int = None) -> Optional[str]:
+        keyword_lower = keyword.lower().strip()
+        async with self._connection.execute(
+            'SELECT reply FROM autoreplies WHERE keyword = ? AND is_active = 1',
+            (keyword_lower,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            if row:
+                return row['reply']
+        async with self._connection.execute(
+            'SELECT reply FROM autoreplies WHERE keyword = ? AND group_id IS NULL AND is_active = 1',
+            (keyword_lower,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row['reply'] if row else None
+
+    async def get_all_autoreplies(self, group_id: int = None) -> List[Dict[str, Any]]:
+        if group_id:
+            async with self._connection.execute(
+                'SELECT * FROM autoreplies WHERE group_id = ? OR group_id IS NULL ORDER BY keyword',
+                (group_id,)
+            ) as cursor:
+                rows = await cursor.fetchall()
+                return [dict(row) for row in rows]
+        async with self._connection.execute(
+            'SELECT * FROM autoreplies ORDER BY keyword'
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    # ============================================================
+    # ALL SETTINGS EXPORT
+    # ============================================================
+
+    async def export_settings(self) -> Dict[str, str]:
+        async with self._connection.execute('SELECT key, value FROM settings') as cursor:
+            rows = await cursor.fetchall()
+            return {row['key']: row['value'] for row in rows}
+
+    async def import_settings(self, settings: Dict[str, str]) -> int:
+        count = 0
+        for key, value in settings.items():
+            try:
+                await self._connection.execute("""
+                    INSERT OR REPLACE INTO settings (key, value, updated_at)
+                    VALUES (?, ?, ?)""", (key, value, datetime.now()))
+                count += 1
+            except Exception:
+                pass
+        await self._connection.commit()
+        return count
+
+    # ============================================================
+    # STATISTICS
+    # ============================================================
 
     async def get_statistics(self) -> Dict[str, Any]:
         """Umumiy statistika"""

@@ -2,6 +2,7 @@
 ╔══════════════════════════════════════════════════════════════╗
 ║           GROUP MIDDLEWARE - aiogram 2.x                     ║
 ║     Anti-Link, Anti-Bot, Anti-Swear filtrlari                ║
+║     Enhanced with Security Module                            ║
 ╚══════════════════════════════════════════════════════════════╝
 """
 
@@ -16,6 +17,7 @@ from config import (
     WARN_LIMIT, MUTE_DURATION_HOURS
 )
 from utils.helpers import contains_link, contains_bad_words, Logger
+from utils.security import rate_limiter, InputValidator, SecurityLogger, anti_abuse
 
 
 def setup_middleware(dp: Dispatcher):
@@ -23,10 +25,30 @@ def setup_middleware(dp: Dispatcher):
 
     @dp.message_handler()
     async def group_middleware(message: Message):
-        """Guruh xabarlarini avtomatik nazorat qilish"""
+        """Guruh xabarlarini avtomatik nazorat qilish with security"""
 
         # Faqat guruh va superguruhlarda ishlaydi
         if message.chat.type not in ['group', 'supergroup']:
+            return
+
+        # Security: Check if user is banned
+        if anti_abuse.is_banned(message.from_user.id):
+            try:
+                await message.delete()
+                SecurityLogger.log_security_event('BANNED_USER_ATTEMPT', message.from_user.id, f'Chat: {message.chat.id}')
+            except Exception:
+                pass
+            return
+
+        # Security: Rate limiting
+        allowed, limit_msg = rate_limiter.is_allowed(message.from_user.id)
+        if not allowed:
+            try:
+                await message.answer(f"⚠️ {limit_msg}")
+                await message.delete()
+                SecurityLogger.log_security_event('RATE_LIMIT_EXCEEDED', message.from_user.id, limit_msg)
+            except Exception:
+                pass
             return
 
         # Adminlarga ta'sir qilmaydi

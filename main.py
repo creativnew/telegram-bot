@@ -56,10 +56,20 @@ logger = logging.getLogger(__name__)
 
 
 async def on_startup(dispatcher):
-    """Bot ishga tushganda"""
+    """Bot ishga tushganda with security checks"""
     logger.info("=" * 60)
     logger.info("🤖 Bot ishga tushmoqda...")
     logger.info("=" * 60)
+
+    # Security: Anti-clone protection check
+    try:
+        from utils.anti_clone import validate_protection, anti_clone
+        if validate_protection():
+            logger.info("✅ Security checks passed")
+        else:
+            logger.warning("⚠️ Security checks failed - running in degraded mode")
+    except Exception as e:
+        logger.error(f"Security check error: {e}")
 
     # Ma'lumotlar bazasi katalogini yaratish
     try:
@@ -106,6 +116,7 @@ async def on_startup(dispatcher):
     # Send startup notification to owner
     try:
         from utils.language import get_text
+        from utils.security import SecurityLogger
         start_lang = await db.get_bot_language()
         await dispatcher.bot.send_message(
             chat_id=OWNER_ID,
@@ -113,11 +124,13 @@ async def on_startup(dispatcher):
             parse_mode='HTML'
         )
         logger.info(f"✅ Startup notification sent to owner {OWNER_ID}")
+        SecurityLogger.log_security_event('BOT_STARTUP', OWNER_ID, 'Bot started successfully')
     except Exception as e:
         logger.error(f"Cannot send startup notification: {e}")
 
     logger.info("=" * 60)
     logger.info("🚀 Bot muvaffaqiyatli ishga tushdi!")
+    logger.info("🔒 Security systems enabled")
     logger.info("=" * 60)
 
 
@@ -150,8 +163,9 @@ def setup_handlers(dp):
 
 
 async def run_webhook(bot, dp):
-    """Webhook rejimida ishga tushirish"""
+    """Webhook rejimida ishga tushirish with security"""
     from aiohttp import web
+    from utils.security import WebhookSecurity, SecurityLogger
 
     WEBHOOK_URL = os.environ.get('WEBHOOK_URL', '')
     WEBHOOK_PATH = '/' + BOT_TOKEN
@@ -166,13 +180,31 @@ async def run_webhook(bot, dp):
     await bot.set_webhook(url=WEBHOOK_HOST + WEBHOOK_PATH)
 
     app = web.Application()
+    
     async def webhook_handler(request):
         try:
+            # Security: Get signature from headers
+            signature = request.headers.get('X-Telegram-Bot-Api-Secret-Token', '')
+            
+            # Read payload
             json_data = await request.json()
+            payload_bytes = str(json_data).encode('utf-8')
+            
+            # Security: Validate signature
+            if not WebhookSecurity.validate_signature(payload_bytes, signature):
+                SecurityLogger.log_security_event('WEBHOOK_SIGNATURE_INVALID', 0, 'Invalid webhook signature')
+                logger.warning("⚠️ Invalid webhook signature!")
+                return web.Response(status=403, text='Forbidden')
+            
+            # Process update
             update = types.Update(**json_data)
             await dp.process_update(update)
+            
+            SecurityLogger.log_security_event('WEBHOOK_SUCCESS', 0, f'Update ID: {update.update_id}')
             return web.Response(status=200, text='ok')
+            
         except Exception as e:
+            SecurityLogger.log_security_event('WEBHOOK_ERROR', 0, str(e))
             logger.error(f"Webhook error: {e}")
             return web.Response(status=500)
 
@@ -183,6 +215,7 @@ async def run_webhook(bot, dp):
     await site.start()
     logger.info(f"✅ Webhook started on port {PORT}")
     logger.info(f"✅ Webhook URL: {WEBHOOK_HOST}{WEBHOOK_PATH}")
+    logger.info(f"✅ Webhook security enabled")
 
     try:
         await asyncio.Event().wait()
@@ -195,43 +228,56 @@ async def run_webhook(bot, dp):
 
 
 def main():
-    """Asosiy funksiya"""
+    """Asosiy funksiya with enhanced error handling"""
 
-    # Token tekshirish
-    if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
-        print("❌ XATOLIK: Bot tokeni kiritilmagan!")
-        print("config.py faylida BOT_TOKEN ni o'zgartiring.")
-        print("\nTokenni @BotFather dan olishingiz mumkin.")
-        return
-
-    if OWNER_ID == 123456789:
-        print("⚠️ OGOHLANTIRISH: OWNER_ID o'zgartirilmagan!")
-        print("config.py faylida o'zingizning Telegram ID raqamingizni kiriting.")
-        print("\nID raqamni @userinfobot dan olishingiz mumkin.")
-
-    # Bot va Dispatcher yaratish
     try:
-        bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+        # Token tekshirish
+        if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
+            print("❌ XATOLIK: Bot tokeni kiritilmagan!")
+            print(".env faylida BOT_TOKEN ni o'zgartiring.")
+            print("\nTokenni @BotFather dan olishingiz mumkin.")
+            return
+
+        if OWNER_ID == 123456789:
+            print("⚠️ OGOHLANTIRISH: OWNER_ID o'zgartirilmagan!")
+            print(".env faylida o'zingizning Telegram ID raqamingizni kiriting.")
+            print("\nID raqamni @userinfobot dan olishingiz mumkin.")
+
+        # Bot va Dispatcher yaratish
+        try:
+            bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+        except Exception as e:
+            print(f"❌ Bot yaratishda xatolik: {e}")
+            logger.error(f"Bot creation failed: {e}")
+            return
+
+        storage = MemoryStorage()
+        dp = Dispatcher(bot, storage=storage)
+        setup_handlers(dp)
+
+        # WEBHOOK_URL o'zgaruvchisi bor bo'lsa - webhook, aks holda polling
+        webhook_url = os.environ.get('WEBHOOK_URL') or os.environ.get('RENDER_EXTERNAL_URL')
+        if webhook_url:
+            os.environ['WEBHOOK_URL'] = webhook_url
+            logger.info("🌐 Webhook mode enabled")
+            asyncio.get_event_loop().run_until_complete(run_webhook(bot, dp))
+        else:
+            logger.info("📡 Polling mode enabled")
+            executor.start_polling(
+                dp,
+                skip_updates=True,
+                on_startup=on_startup,
+                on_shutdown=on_shutdown
+            )
+    
+    except KeyboardInterrupt:
+        print("\n\n👋 Bot to'xtatildi (Ctrl+C)")
+        logger.info("Bot stopped by user (Ctrl+C)")
     except Exception as e:
-        print(f"❌ Bot yaratishda xatolik: {e}")
-        return
-
-    storage = MemoryStorage()
-    dp = Dispatcher(bot, storage=storage)
-    setup_handlers(dp)
-
-    # WEBHOOK_URL o'zgaruvchisi bor bo'lsa - webhook, aks holda polling
-    webhook_url = os.environ.get('WEBHOOK_URL') or os.environ.get('RENDER_EXTERNAL_URL')
-    if webhook_url:
-        os.environ['WEBHOOK_URL'] = webhook_url
-        asyncio.get_event_loop().run_until_complete(run_webhook(bot, dp))
-    else:
-        executor.start_polling(
-            dp,
-            skip_updates=True,
-            on_startup=on_startup,
-            on_shutdown=on_shutdown
-        )
+        print(f"\n\n❌ Kutilmagan xatolik: {e}")
+        logger.error(f"Unexpected error in main: {e}")
+        from utils.security import SecurityLogger
+        SecurityLogger.log_security_event('CRITICAL_ERROR', 0, str(e))
 
 
 if __name__ == "__main__":

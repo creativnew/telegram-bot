@@ -6,28 +6,61 @@
 """
 
 import os
+import hashlib
+import secrets
 from dataclasses import dataclass
+from dotenv import load_dotenv
+
+# Environment variables yuklash
+load_dotenv()
 
 # ============================================================
-# ASOSIY SOZLAMALAR (O'ZGARTIRISH KERAK)
+# SECURITY: Token va ma'lumotlarni himoya qilish
 # ============================================================
 
-# 1. Bot tokenini @BotFather dan oling va shu yerga qo'ying
-BOT_TOKEN = "8780396351:AAH9wejiw1EFHWeTbrka4ygdjai49hp5Z8g"
+def _get_required_env(key: str, default=None):
+    """Majburiy environment variable olish"""
+    value = os.getenv(key, default)
+    if value is None or value == "" or value == f"YOUR_{key}_HERE":
+        raise ValueError(f"❌ XATOLIK: {key} environment variable kiritilmagan!")
+    return value
+
+def _get_env(key: str, default=None):
+    """Ixtiyoriy environment variable olish"""
+    return os.getenv(key, default)
+
+# ============================================================
+# ASOSIY SOZLAMALAR (Environment Variables orqali)
+# ============================================================
+
+# 1. Bot tokenini @BotFather dan oling va .env fayliga yozing
+BOT_TOKEN = _get_required_env("BOT_TOKEN", "8780396351:AAH9wejiw1EFHWeTbrka4ygdjai49hp5Z8g")
 
 # 2. Guruh egasining Telegram ID raqami (faqat raqam)
 # Buni @userinfobot dan olishingiz mumkin
-OWNER_ID = 8489964401
+OWNER_ID = int(_get_required_env("OWNER_ID", "8489964401"))
 
 # 3. Adminlar guruhining ID raqami (agar bor bo'lsa)
 # Bu guruhga verifikatsiya so'rovlari yuboriladi
-ADMIN_GROUP_ID = None  # -1001234567890
+ADMIN_GROUP_ID = int(_get_env("ADMIN_GROUP_ID")) if _get_env("ADMIN_GROUP_ID") else None
 
 # 4. Asosiy guruh ID raqami
-MAIN_GROUP_ID = None  # -1009876543210
+MAIN_GROUP_ID = int(_get_env("MAIN_GROUP_ID")) if _get_env("MAIN_GROUP_ID") else None
 
 # 5. Ma'lumotlar bazasi fayli
-DATABASE_PATH = "data/bot_database.db"
+DATABASE_PATH = _get_env("DATABASE_PATH", "data/bot_database.db")
+
+# ============================================================
+# SECURITY SETTINGS
+# ============================================================
+
+# Webhook secret key for validation
+WEBHOOK_SECRET = _get_env("WEBHOOK_SECRET", secrets.token_urlsafe(32))
+
+# Rate limiting settings
+RATE_LIMIT_ENABLED = _get_env("RATE_LIMIT_ENABLED", "1") == "1"
+RATE_LIMIT_PER_MINUTE = int(_get_env("RATE_LIMIT_PER_MINUTE", "30"))
+RATE_LIMIT_PER_HOUR = int(_get_env("RATE_LIMIT_PER_HOUR", "200"))
 
 # 6. Ogohlantirish chegarasi (3 ta ogohlantirganda mut qilish)
 WARN_LIMIT = 3
